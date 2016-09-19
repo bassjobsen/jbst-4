@@ -1,7 +1,7 @@
 +function ($) {
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): util.js
+ * Bootstrap (v4.0.0-alpha.4): util.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -17,6 +17,8 @@ var Util = (function ($) {
    */
 
   var transition = false;
+
+  var MAX_UID = 1000000;
 
   var TransitionEndEvent = {
     WebkitTransition: 'webkitTransitionEnd',
@@ -40,8 +42,9 @@ var Util = (function ($) {
       delegateType: transition.end,
       handle: function handle(event) {
         if ($(event.target).is(this)) {
-          return event.handleObj.handler.apply(this, arguments);
+          return event.handleObj.handler.apply(this, arguments); // eslint-disable-line prefer-rest-params
         }
+        return undefined;
       }
     };
   }
@@ -102,7 +105,9 @@ var Util = (function ($) {
 
     getUID: function getUID(prefix) {
       do {
-        prefix += ~ ~(Math.random() * 1000000); // "~~" acts like a faster Math.floor() here
+        /* eslint-disable no-bitwise */
+        prefix += ~ ~(Math.random() * MAX_UID); // "~~" acts like a faster Math.floor() here
+        /* eslint-enable no-bitwise */
       } while (document.getElementById(prefix));
       return prefix;
     },
@@ -165,7 +170,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): alert.js
+ * Bootstrap (v4.0.0-alpha.4): alert.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -179,7 +184,7 @@ var Alert = (function ($) {
    */
 
   var NAME = 'alert';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.alert';
   var EVENT_KEY = '.' + DATA_KEY;
   var DATA_API_KEY = '.data-api';
@@ -352,7 +357,7 @@ var Alert = (function ($) {
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): button.js
+ * Bootstrap (v4.0.0-alpha.4): button.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -372,7 +377,7 @@ var Button = (function ($) {
    */
 
   var NAME = 'button';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.button';
   var EVENT_KEY = '.' + DATA_KEY;
   var DATA_API_KEY = '.data-api';
@@ -447,6 +452,8 @@ var Button = (function ($) {
               input.checked = !$(this._element).hasClass(ClassName.ACTIVE);
               $(this._element).trigger('change');
             }
+
+            input.focus();
           }
         } else {
           this._element.setAttribute('aria-pressed', !$(this._element).hasClass(ClassName.ACTIVE));
@@ -531,7 +538,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): carousel.js
+ * Bootstrap (v4.0.0-alpha.4): carousel.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -545,12 +552,14 @@ var Carousel = (function ($) {
    */
 
   var NAME = 'carousel';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.carousel';
   var EVENT_KEY = '.' + DATA_KEY;
   var DATA_API_KEY = '.data-api';
   var JQUERY_NO_CONFLICT = $.fn[NAME];
   var TRANSITION_DURATION = 600;
+  var ARROW_LEFT_KEYCODE = 37; // KeyboardEvent.which value for left arrow key
+  var ARROW_RIGHT_KEYCODE = 39; // KeyboardEvent.which value for right arrow key
 
   var Default = {
     interval: 5000,
@@ -766,10 +775,12 @@ var Carousel = (function ($) {
         }
 
         switch (event.which) {
-          case 37:
-            this.prev();break;
-          case 39:
-            this.next();break;
+          case ARROW_LEFT_KEYCODE:
+            this.prev();
+            break;
+          case ARROW_RIGHT_KEYCODE:
+            this.next();
+            break;
           default:
             return;
         }
@@ -1010,7 +1021,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): collapse.js
+ * Bootstrap (v4.0.0-alpha.4): collapse.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -1024,7 +1035,7 @@ var Collapse = (function ($) {
    */
 
   var NAME = 'collapse';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.collapse';
   var EVENT_KEY = '.' + DATA_KEY;
   var DATA_API_KEY = '.data-api';
@@ -1375,7 +1386,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): dropdown.js
+ * Bootstrap (v4.0.0-alpha.4): dropdown.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -1389,11 +1400,15 @@ var Dropdown = (function ($) {
    */
 
   var NAME = 'dropdown';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.dropdown';
   var EVENT_KEY = '.' + DATA_KEY;
   var DATA_API_KEY = '.data-api';
   var JQUERY_NO_CONFLICT = $.fn[NAME];
+  var ESCAPE_KEYCODE = 27; // KeyboardEvent.which value for Escape (Esc) key
+  var ARROW_UP_KEYCODE = 38; // KeyboardEvent.which value for up arrow key
+  var ARROW_DOWN_KEYCODE = 40; // KeyboardEvent.which value for down arrow key
+  var RIGHT_MOUSE_BUTTON_WHICH = 3; // MouseEvent.which value for the right button (assuming a right-handed mouse)
 
   var Event = {
     HIDE: 'hide' + EVENT_KEY,
@@ -1528,7 +1543,7 @@ var Dropdown = (function ($) {
     }, {
       key: '_clearMenus',
       value: function _clearMenus(event) {
-        if (event && event.which === 3) {
+        if (event && event.which === RIGHT_MOUSE_BUTTON_WHICH) {
           return;
         }
 
@@ -1591,9 +1606,9 @@ var Dropdown = (function ($) {
         var parent = Dropdown._getParentFromElement(this);
         var isActive = $(parent).hasClass(ClassName.OPEN);
 
-        if (!isActive && event.which !== 27 || isActive && event.which === 27) {
+        if (!isActive && event.which !== ESCAPE_KEYCODE || isActive && event.which === ESCAPE_KEYCODE) {
 
-          if (event.which === 27) {
+          if (event.which === ESCAPE_KEYCODE) {
             var toggle = $(parent).find(Selector.DATA_TOGGLE)[0];
             $(toggle).trigger('focus');
           }
@@ -1614,17 +1629,17 @@ var Dropdown = (function ($) {
 
         var index = items.indexOf(event.target);
 
-        if (event.which === 38 && index > 0) {
+        if (event.which === ARROW_UP_KEYCODE && index > 0) {
           // up
           index--;
         }
 
-        if (event.which === 40 && index < items.length - 1) {
+        if (event.which === ARROW_DOWN_KEYCODE && index < items.length - 1) {
           // down
           index++;
         }
 
-        if (! ~index) {
+        if (index < 0) {
           index = 0;
         }
 
@@ -1669,7 +1684,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): modal.js
+ * Bootstrap (v4.0.0-alpha.4): modal.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -1683,13 +1698,14 @@ var Modal = (function ($) {
    */
 
   var NAME = 'modal';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.modal';
   var EVENT_KEY = '.' + DATA_KEY;
   var DATA_API_KEY = '.data-api';
   var JQUERY_NO_CONFLICT = $.fn[NAME];
   var TRANSITION_DURATION = 300;
   var BACKDROP_TRANSITION_DURATION = 150;
+  var ESCAPE_KEYCODE = 27; // KeyboardEvent.which value for Escape (Esc) key
 
   var Default = {
     backdrop: true,
@@ -1885,6 +1901,7 @@ var Modal = (function ($) {
         }
 
         this._element.style.display = 'block';
+        this._element.removeAttribute('aria-hidden');
         this._element.scrollTop = 0;
 
         if (transition) {
@@ -1921,7 +1938,7 @@ var Modal = (function ($) {
 
         $(document).off(Event.FOCUSIN) // guard against infinite focus loop
         .on(Event.FOCUSIN, function (event) {
-          if (_this3._element !== event.target && !$(_this3._element).has(event.target).length) {
+          if (document !== event.target && _this3._element !== event.target && !$(_this3._element).has(event.target).length) {
             _this3._element.focus();
           }
         });
@@ -1933,7 +1950,7 @@ var Modal = (function ($) {
 
         if (this._isShown && this._config.keyboard) {
           $(this._element).on(Event.KEYDOWN_DISMISS, function (event) {
-            if (event.which === 27) {
+            if (event.which === ESCAPE_KEYCODE) {
               _this4.hide();
             }
           });
@@ -1956,6 +1973,7 @@ var Modal = (function ($) {
         var _this5 = this;
 
         this._element.style.display = 'none';
+        this._element.setAttribute('aria-hidden', 'true');
         this._showBackdrop(function () {
           $(document.body).removeClass(ClassName.OPEN);
           _this5._resetAdjustments();
@@ -2061,7 +2079,7 @@ var Modal = (function ($) {
         }
 
         if (this._isBodyOverflowing && !isModalOverflowing) {
-          this._element.style.paddingRight = this._scrollbarWidth + 'px~';
+          this._element.style.paddingRight = this._scrollbarWidth + 'px';
         }
       }
     }, {
@@ -2073,13 +2091,7 @@ var Modal = (function ($) {
     }, {
       key: '_checkScrollbar',
       value: function _checkScrollbar() {
-        var fullWindowWidth = window.innerWidth;
-        if (!fullWindowWidth) {
-          // workaround for missing window.innerWidth in IE8
-          var documentElementRect = document.documentElement.getBoundingClientRect();
-          fullWindowWidth = documentElementRect.right - Math.abs(documentElementRect.left);
-        }
-        this._isBodyOverflowing = document.body.clientWidth < fullWindowWidth;
+        this._isBodyOverflowing = document.body.clientWidth < window.innerWidth;
         this._scrollbarWidth = this._getScrollbarWidth();
       }
     }, {
@@ -2206,7 +2218,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): scrollspy.js
+ * Bootstrap (v4.0.0-alpha.4): scrollspy.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -2220,7 +2232,7 @@ var ScrollSpy = (function ($) {
    */
 
   var NAME = 'scrollspy';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.scrollspy';
   var EVENT_KEY = '.' + DATA_KEY;
   var DATA_API_KEY = '.data-api';
@@ -2335,6 +2347,7 @@ var ScrollSpy = (function ($) {
             // todo (fat): remove sketch reliance on jQuery position/offset
             return [$(target)[offsetMethod]().top + offsetBase, targetSelector];
           }
+          return null;
         }).filter(function (item) {
           return item;
         }).sort(function (a, b) {
@@ -2441,7 +2454,7 @@ var ScrollSpy = (function ($) {
           $link.closest(Selector.DROPDOWN).find(Selector.DROPDOWN_TOGGLE).addClass(ClassName.ACTIVE);
           $link.addClass(ClassName.ACTIVE);
         } else {
-          // todo (fat) this is kinda sus…
+          // todo (fat) this is kinda sus...
           // recursively add actives to tested nav-links
           $link.parents(Selector.LI).find(Selector.NAV_LINKS).addClass(ClassName.ACTIVE);
         }
@@ -2527,7 +2540,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): tab.js
+ * Bootstrap (v4.0.0-alpha.4): tab.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -2541,7 +2554,7 @@ var Tab = (function ($) {
    */
 
   var NAME = 'tab';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.tab';
   var EVENT_KEY = '.' + DATA_KEY;
   var DATA_API_KEY = '.data-api';
@@ -2793,7 +2806,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): tooltip.js
+ * Bootstrap (v4.0.0-alpha.4): tooltip.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -2815,7 +2828,7 @@ var Tooltip = (function ($) {
    */
 
   var NAME = 'tooltip';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.tooltip';
   var EVENT_KEY = '.' + DATA_KEY;
   var JQUERY_NO_CONFLICT = $.fn[NAME];
@@ -3415,7 +3428,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== 'function' 
 
 /**
  * --------------------------------------------------------------------------
- * Bootstrap (v4.0.0-alpha.2): popover.js
+ * Bootstrap (v4.0.0-alpha.4): popover.js
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * --------------------------------------------------------------------------
  */
@@ -3429,7 +3442,7 @@ var Popover = (function ($) {
    */
 
   var NAME = 'popover';
-  var VERSION = '4.0.0-alpha';
+  var VERSION = '4.0.0-alpha.4';
   var DATA_KEY = 'bs.popover';
   var EVENT_KEY = '.' + DATA_KEY;
   var JQUERY_NO_CONFLICT = $.fn[NAME];
